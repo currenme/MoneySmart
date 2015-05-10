@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<title>Interest Rate</title>
+	<link rel="stylesheet" type="text/css" href="css/styles.css">
+	<link rel="stylesheet" type="text/css" href="css/calc.css">
+	<style>
+	#graph {
+		float: left;
+	}
+	#table td {
+		text-align: right;
+	}
+	#table tr:nth-child(odd) {
+		background-color:#F6F4F0;
+	}
+	#table tr:nth-child(even) {
+		background-color:#ffffff;
+	}
+	#table th {
+		color:#ffffff;
+		background-color:#555555;
+		border:1px solid #555555;
+		vertical-align:top;
+	}	
+	#x-label {
+		margin-left: 290px;
+		font-family: Helvetica, Veranda, Arial, sans-serif;
+	}
+	#y-label {
+		width:20px;
+		height:20px;
+		-ms-transform:rotate(270deg); /* IE 9 */
+		-moz-transform:rotate(270deg); /* Firefox */
+		-webkit-transform:rotate(270deg); /* Safari and Chrome */
+		-o-transform:rotate(270deg); /* Opera */
+	}
+	#y-label-container {
+		float: left;
+		padding-top: 200px;
+	}
+	</style>
+	<script src="Chart.js"></script>
+	<script>
+		var FutureAccrual = new Array();
+		var AdjustedFutureAccrual = new Array();
+		var counter = 0;
+		var interestRate = 0;
+		var initialValue = 0;
+		var AdjustedInterest = 0;
+		var inflationInput = 0;
+		var Inflation = .0323;
+		var NetRealRate = 0;
+		var tempValue1 = 0;
+		var tempValue2 = 0; 
+
+		function getInterestRate()
+		{
+			interestRate = document.getElementById('user_rate').value;
+			interestRate = parseFloat(interestRate);
+			if (interestRate>=0 && interestRate!= NaN)
+			{
+				document.getElementById("printIntRate").innerHTML=interestRate;
+			}
+			else
+			{
+				boolInput = false;
+
+				while (boolInput == false)
+				{
+					var newinterestRate = prompt('Interest Rate: Please enter a number greater than or equal to 0');
+					if (newinterestRate >= 0)
+					{
+						boolInput = true; 
+						interestRate = newinterestRate;
+						document.getElementById("user_rate").value = interestRate;
+						document.getElementById("printIntRate").innerHTML=interestRate;
+					}
+				}
+			}
+		}
+		function getInitialValue()
+		{
+			initialValue = document.getElementById('user_initial').value;
+			initialValue = parseFloat(initialValue);
+
+			if (initialValue>=0 && initialValue!=NaN)
+			{
+				document.getElementById("printInitialValue").innerHTML=initialValue;
+			}
+			else 
+			{
+				boolInput = false;
+
+				while (boolInput == false)
+				{
+					var newInitialValue = prompt('Initial Deposit: Please enter a number greater than or equal to 0');
+
+					if (newInitialValue >= 0)
+					{
+						boolInput = true; 
+						initialValue = newInitialValue;
+						document.getElementById("user_initial").value = initialValue;
+						document.getElementById("printInitialValue").innerHTML=initialValue;
+					}
+				}
+			}
+		}
+		function getInflationInput()
+		{
+			inflationInput = document.getElementById('user_inflation_rate').value;
+			inflationInput = parseFloat(inflationInput);
+			if ((inflationInput >= 0 || inflationInput < 0) && inflationInput != NaN)
+			{
+				document.getElementById("printInflationRate").innerHTML=inflationInput;
+			}
+			else
+			{
+				boolInput = false;
+
+				while (boolInput == false)
+				{
+					var newinflationRate = prompt('Please enter a number');
+					if ((newinflationRate >= 0 || newinflationRate < 0) && newinflationRate != NaN)
+					{
+						boolInput = true; 
+						inflationInput = newinflationRate;
+						document.getElementById("user_inflation_rate").value = inflationInput;
+						document.getElementById("printInflationRate").innerHTML=inflationInput;
+					}
+				}
+			}
+
+		}
+		function calculate()
+		{
+			getInterestRate();
+			getInitialValue();
+			getInflationInput();
+			PopulateArray_Standard();
+			PopulateArray_Inflation();
+			updateTable();
+			drawGraph();
+		}
+		function PopulateArray_Standard () 
+		{
+			tempValue1 = initialValue;
+			FutureAccrual[0] = initialValue;
+			AdjustedInterest = (interestRate/100)+1;
+			for (var i = 1; i < 11; i++)
+			{
+				var test;
+				test = tempValue1 * AdjustedInterest;
+				tempValue1 = test;
+				test_rounded = Math.round(test*100)/100;
+				FutureAccrual[i] = test_rounded;
+			}
+		}
+		function PopulateArray_Inflation ()
+		{
+			tempValue2 = initialValue;
+			AdjustedFutureAccrual[0] = initialValue;
+			AdjustedInterest = (interestRate/100)+1;
+			Inflation = inflationInput/100;
+			NetRealRate = AdjustedInterest - Inflation;
+			for (var i = 1; i < 11; i++)
+			{
+				var test2;
+				test2 = tempValue2 * NetRealRate;
+				tempValue2 = test2; 
+				test2_rounded = Math.round(test2*100)/100;
+				AdjustedFutureAccrual[i] = test2_rounded;
+			}     
+		}
+		function updateTable ()
+		{
+			for (var i=0; i<11; i++)
+			{
+				document.getElementById(i+10).innerHTML=FutureAccrual[i];
+			}
+			for (var i=0; i<11; i++)
+			{
+				document.getElementById(i+30).innerHTML=AdjustedFutureAccrual[i];
+			}
+		}
+		function drawGraph ()
+		{
+			var canvas2 = document.getElementById("canvas");
+			canvas2.height = 450;
+			canvas2.width = 600;
+			var lineChartData = {
+				labels : ["0","1","2","3","4","5","6","7","8","9","10"],
+				datasets : [
+					{
+						//blue line
+						fillColor : "rgba(151,187,205,0.15)",
+						strokeColor : "rgba(151,187,205,1)",
+						pointColor : "rgba(151,187,205,1)",
+						pointStrokeColor : "#fff",
+						data : [FutureAccrual[0],FutureAccrual[1],FutureAccrual[2],FutureAccrual[3],FutureAccrual[4],FutureAccrual[5],FutureAccrual[6],FutureAccrual[7],FutureAccrual[8],FutureAccrual[9],FutureAccrual[10]]
+					},
+					{
+						//green line
+						fillColor : "rgba(30,206,36,0.0)",
+						strokeColor : "rgba(30,206,36,0.7)",
+						pointColor : "rgba(30,206,36,0.7)",
+						pointStrokeColor : "#fff",
+						data : [AdjustedFutureAccrual[0],AdjustedFutureAccrual[1],AdjustedFutureAccrual[2],AdjustedFutureAccrual[3],AdjustedFutureAccrual[4],AdjustedFutureAccrual[5],AdjustedFutureAccrual[6],AdjustedFutureAccrual[7],AdjustedFutureAccrual[8],AdjustedFutureAccrual[9],AdjustedFutureAccrual[10]]
+					}
+				]
+			}
+			var options = {
+				bezierCurve : false,
+			}
+			var myLine = new Chart(document.getElementById("canvas").getContext("2d")).Line(lineChartData,options);
+		}
+	</script>
+</head>
+
+<body onLoad="drawGraph();">
+	<div id="header-container">
+		<div id="header">
+			<h1 style="float:left;"><a href="index.html">Finance for Kids</a></h1>
+			<span id="header-links"><p><a href="interest_calculator.html">Interest Calculator</a> | <a href="retirement_app.html">Retirement Calculator</a></p></span>
+		</div>
+	</div>
+	<div id="container">
+		<div id="calc_input">
+			<div style="text-align:center; font-size:18px;padding-bottom:10px;">Enter Values</div>
+			<div class="label">Interest Rate:</div>
+			&nbsp;&nbsp;<input type="text" id="user_rate" style="width:65px" maxlength="5" />%<br />
+
+			<div class="label">Initial Deposit:</div>
+			$<input type="text" id="user_initial" style="width:65px" /><br />
+
+			<div class="label">Expected Inflation Rate:</div>
+			&nbsp;&nbsp;<input type="text" id="user_inflation_rate" style="width:65px" value="3.23" />%<br />
+			<br />
+			<div id="calculateButton">
+				<button type="button" onclick="calculate()">Calculate</button>
+			</div>
+			<br />	
+			<!-- reset button? -->
+		</div>
+		
+		<p>
+			Showing graph for a <span id="printIntRate">0</span>% interest rate with an initial deposit of $<span id="printInitialValue">0</span>.
+			<br />
+			Adjusted values are calculated using an expected inflation rate of <span id="printInflationRate">0</span>%.
+		</p>
+
+		
+		<div id="graph-container">
+			<div id="y-label-container">
+				<div id="y-label">
+					Dollars
+				</div>
+			</div>
+			<div id="graph">
+				<canvas id="canvas" height="450" width="600"></canvas>
+			</div>
+		</div>
+		<div id="legend">
+			<img src="images/graph_legend.jpg" alt="Graph legend" width="224" height="96" />
+			<p><strong>
+				What do the lines on the graph represent? 
+			</strong></p>
+			
+			<p>
+				Line 1 in the graph represents the overall amount of money you have in your bank account each year; it simply takes into account only the interest rate.
+				This is the amount that you'll see on your bank statement.
+			</p>
+			<p>
+				Line 2 is a theoretical line which represents your purchasing power, or the effect of both the interest rate and inflation over time. This shows how much
+				money you have in terms of the amount of money you had originally. This is because, relative to the price of goods, you may be getting theoretically poorer
+				despite interest payments, due the effects of inflation. 
+			</p>
+		</div>
+
+		<br style="clear:both" />
+
+		<span id="x-label">Year</span>
+
+		<br />
+		<br />
+		<div id="table">
+			<table style="width:900px">
+				<tr>
+					<th></th>
+					<th>Initial Amount</th> 
+					<th>After 1 Year</th>
+					<th>After 2 Years</th>
+					<th>After 3 Years</th>
+					<th>After 4 Years</th>
+					<th>After 5 Years</th>
+					<th>After 6 Years</th>
+					<th>After 7 Years</th>
+					<th>After 8 Years</th>
+					<th>After 9 Years</th>
+					<th>After 10 Years</th>
+				</tr>
+				<tr>
+					<th width="100">Actual Cash</th>
+					<td id="10">0</td>
+					<td id="11">0</td>
+					<td id="12">0</td>
+					<td id="13">0</td>
+					<td id="14">0</td>
+					<td id="15">0</td>
+					<td id="16">0</td>
+					<td id="17">0</td>
+					<td id="18">0</td>
+					<td id="19">0</td>
+					<td id="20">0</td>
+				</tr>
+				<tr>
+					<th width="100">Value in Today's Dollars</th>
+					<td id="30">0</td>
+					<td id="31">0</td>
+					<td id="32">0</td>
+					<td id="33">0</td>
+					<td id="34">0</td>
+					<td id="35">0</td>
+					<td id="36">0</td>
+					<td id="37">0</td>
+					<td id="38">0</td>
+					<td id="39">0</td>
+					<td id="40">0</td>
+				</tr>
+			</table>
+		</div>
+		<br />
+		<br />
+
+		<p><strong>
+			What is interest? 
+		</strong></p>
+
+		<p>
+			Interest rate, as it relates to savings, is the rate at which your money accrues, or increases in value.
+			This increase in value is determined by both a set percent and a fixed period of time. For example, if your interest rate is 5% per year, then your money will increase in value by 5% each year.
+			To calculate the accrual, the percent interest rate is turned into a decimal (e.g. 5% becomes .05) and then the present amount of money is multiplied by one plus the decimal rate.
+			For example, if you start with $1000 and have a 5% interest rate per year, then 1000*1.05 represents the amount of money you will
+			have in your bank account next year.
+			For more information, check out this <a href = "http://en.wikipedia.org/wiki/Interest">Wikipedia article about interest</a>!
+		</p>
+		
+		<p><strong>
+			What is the average interest rate for a savings account?
+		</strong></p>
+		
+		<p>
+			A savings account is a bank account where the money in it accrues over time as a result of interest payments.  Limits over how much
+			money can be taken out of a savings account and the inability to, for example, write checks with money directly from a savings account
+			makes a savings account intended use to be for "saving" money, rather than using it regularly.
+			The average interest rate that a savings account pays is between 0.06% and 0.17%, based on various news articles. 
+			For more information, check out this <a href = "http://en.wikipedia.org/wiki/Savings_account">Wikipedia article about savings accounts</a>!
+		</p>
+		
+		<p><strong>
+			What is inflation? 
+		</strong></p>
+		
+		<p>
+			Inflation refers to the sustained increase in the price of goods.  This means that a loaf of bread that is $5 one year could cost $6 the next year.
+			This leads to the conclusion that $5 is worth less and less overtime, because the price of goods increases.
+			Historically, the average inflation for the USA is 3.23% per year, meaning a $100.00 item will cost $103.23 the next year, on average.
+			For more information, check out this <a href="http://en.wikipedia.org/wiki/Inflation">Wikipedia article about inflation</a>.
+		</p>
+
+
+
+
+
+
+
+
+
+	</div>
+</body>
+</html>
+
+
+
+

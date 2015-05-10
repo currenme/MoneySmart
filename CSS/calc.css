@@ -1,0 +1,21 @@
+#calc_input {
+	background-color: #D3DDE8;
+	width: 400px;
+	padding-top: 15px;
+	border-radius: 10px;
+	-wekbit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	margin: auto;
+}
+
+.label {
+		width: 170px;
+		float: left;
+		text-align: right;
+		padding-right: 5px;
+		padding-top: 5px;
+}
+
+#calculateButton {
+	text-align: center;
+}

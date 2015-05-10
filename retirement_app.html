@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<title>Retirement Calculator</title>
+	<style>
+	#graph 
+	{
+		float: left;
+	}
+	#goal_information
+	{
+		text-align: center;
+		font-size: large; 
+		height: 70px;
+	}
+	#x-label {
+		margin-left: 290px;
+		font-family: Helvetica, Veranda, Arial, sans-serif;
+	}
+	#y-label {
+		width:20px;
+		height:20px;
+		-ms-transform:rotate(270deg); /* IE 9 */
+		-moz-transform:rotate(270deg); /* Firefox */
+		-webkit-transform:rotate(270deg); /* Safari and Chrome */
+		-o-transform:rotate(270deg); /* Opera */
+	}
+	#y-label-container {
+		float: left;
+		padding-top: 200px;
+	}
+	</style> 
+
+	<link rel="stylesheet" type="text/css" href="css/styles.css">
+	<link rel="stylesheet" type="text/css" href="css/calc.css">
+	<script src="Chart.js"></script>
+	<script>
+		var yearsUntilRetire = 0;
+		var Raise = 0;
+		var futureMoney = 0;
+		var IncomeArray = new Array ();
+		var SavedArray = new Array (); 
+		var Salary = 0; //Input fewfe
+		var PercentSaved = 0; //Input ewfe
+		var sum_Saved = 0;
+		var RetireAge = 0; //Input ffe
+		var CurrentAge = 0; //Input fewf
+		var PerYearRetirement = 0; //Input dddw
+		var totalGoal = 0;
+		var DesiredLifespan = 0; //Input 
+		var difference = 0;
+		var PY_difference = 0;
+		var PY_difference_Inflate = 0;
+		var InflateAdjust = 0;
+		var InflateDifference = 0; 
+		var CurrentYearly = 0; 
+		var initsum = 0; 
+		var GoalAverage = 0; 
+		var InflatedGoalAverage = 0; 
+		var truncateCurrentYearly = 0; 
+		var truncateGoalAverage = 0; 
+		var truncatePY_difference = 0;
+		var truncateInflatedGoalAverage = 0;
+		var truncatePY_difference_Inflate = 0; 
+		var truncatesum_Saved = 0; 
+		var truncateTotalGoal =0; 
+		var truncateInflateAdjust = 0; 
+		var ReachedGoal = false; 
+		var ReachedGoal2 = false; 
+		var Goal_string = ""; 
+		var Goal_string2 = "";
+		var absPY_difference = 0;
+		var absPY_difference_inflate = 0; 
+		var difference_string1 = ""; 
+		var difference_string2 = "";
+
+		function getCurrentAge()
+		{
+			CurrentAge = document.getElementById('iCurrentAge').value;
+			CurrentAge = parseFloat(CurrentAge);
+			if (CurrentAge>=0 && CurrentAge!= NaN)
+			{
+			}
+			else
+			{
+				boolInput = false; 
+				while (boolInput == false)
+				{
+					var newCurrentAge = prompt("Age: please enter an number greater than or equal to zero");
+					if (newCurrentAge >=0)
+					{
+						boolInput = true;
+						CurrentAge = newCurrentAge;
+						document.getElementById('iCurrentAge').value = CurrentAge; 
+					}
+				}
+			}
+		}
+		function getSalary()
+		{
+			Salary = document.getElementById('iSalary').value; 
+			Salary = parseFloat(Salary); 
+			if (Salary>=0 && Salary != NaN)
+			{
+			}
+			else 
+			{
+				boolInput = false; 
+				while (boolInput == false)
+				{
+					var newSalary = prompt("Salary: please enter an number greater than or equal to zero");
+					if (newSalary >=0)
+					{
+						boolInput = true;
+						Salary = newSalary; 
+						document.getElementById('iSalary').value = Salary; 
+					}
+				}
+			}
+		}
+		function getPercentSaved()
+		{
+			PercentSaved = document.getElementById('iPercentSaved').value;
+			PercentSaved = parseFloat(PercentSaved);
+			if (PercentSaved>=0 && PercentSaved!= NaN && PercentSaved<=100)
+			{
+			}
+			else
+			{
+				boolInput = false; 
+				while (boolInput == false)
+				{
+					var newPercentSaved = prompt("Percent of Income to be Saved: please enter an number greater than or equal to zero, and less than or equal to 100");
+					if (newPercentSaved>=0 && newPercentSaved<=100)
+					{
+						boolInput = true;
+						PercentSaved = newPercentSaved; 
+						document.getElementById('iPercentSaved').value = PercentSaved; 
+					}
+				}
+			}
+		}
+		function getRetireAge()
+		{
+			RetireAge = document.getElementById('iRetireAge').value;
+			RetireAge = parseFloat(RetireAge);
+			if (RetireAge > CurrentAge && RetireAge!= NaN)
+			{
+			}
+			else
+			{
+				boolInput = false; 
+				while (boolInput == false)
+				{
+					var newRetireAge = prompt("Retirement Age: please enter an number greater than your current age");
+					if (newRetireAge>CurrentAge)
+					{
+						boolInput = true;
+						RetireAge = newRetireAge; 
+						document.getElementById('iRetireAge').value = RetireAge;  
+					}
+				}
+			}
+		}
+		function getPerYearRetirement()
+		{
+			PerYearRetirement = document.getElementById('iPerYearRetirement').value;
+			PerYearRetirement = parseFloat(PerYearRetirement);
+			if (PerYearRetirement >=0 && PerYearRetirement!= NaN)
+			{
+			}
+			else
+			{
+				boolInput = false; 
+				while (boolInput == false)
+				{
+					var newPerYearRetirement = prompt("Expected Yearly Expenditures During Retirement: please enter an number greater than or equal to zero");
+					if (newPerYearRetirement >=0)
+					{
+						boolInput = true;
+						PerYearRetirement = newPerYearRetirement; 
+						document.getElementById('iPerYearRetirement').value = PerYearRetirement; 
+					}
+				}
+			}
+		}
+		function getDesiredLifeSpan()
+		{
+			DesiredLifespan = document.getElementById('iDesiredLifespan').value;
+			DesiredLifespan = parseFloat(DesiredLifespan);
+			if (DesiredLifespan > RetireAge && DesiredLifespan!= NaN)
+			{
+			}
+			else
+			{
+				boolInput = false; 
+				while (boolInput == false)
+				{
+					var newDesiredLifespan = prompt("Estimated Lifespan: please enter an number greater than the retirement age");
+					if (newDesiredLifespan > RetireAge)
+					{
+						boolInput = true;
+						DesiredLifespan = newDesiredLifespan; 
+						document.getElementById('iDesiredLifespan').value = DesiredLifespan;  
+					}
+				}
+			}
+		}
+		function getsum_Saved()
+		{
+			sum_Saved = document.getElementById('isum_Saved').value;
+			sum_Saved = parseFloat(sum_Saved);
+			if (sum_Saved>=0 && sum_Saved!= NaN)
+			{
+			}
+			else
+			{
+				boolInput = false; 
+				while (boolInput == false)
+				{
+					var newsum_Saved = prompt("Amount Saved So Far: please enter an number greater than or equal to 0");
+					if (newsum_Saved >= 0)
+					{
+						boolInput = true;
+						sum_Saved = newsum_Saved; 
+						document.getElementById('isum_Saved').value = sum_Saved;  
+					}
+				}
+			}
+		}
+		function getRaise()
+		{
+			Raise =  document.getElementById('iRaise').value;
+			Raise = parseFloat(Raise); 
+			if (Raise>=0 && Raise!= NaN)
+			{
+			}
+			else
+			{
+				boolInput = false; 
+				while (boolInput == false)
+				{
+					var newRaise= prompt("Estimated Yearly Raise Percent: please enter an number greater than or equal to 0");
+					if (newRaise >= 0)
+					{
+						boolInput = true;
+						Raise = newRaise; 
+						document.getElementById('iRaise').value = Raise;  
+					}
+				}
+			}
+		}
+		function calculate()
+		{
+			getRaise(); 
+			getsum_Saved();
+			getSalary();
+			getCurrentAge();
+			getRetireAge(); 
+			getDesiredLifeSpan();
+			getPercentSaved();  
+			getPerYearRetirement();  
+			sum_Saved = parseFloat(sum_Saved);
+			YearsToRetirement();
+			SalaryPerYear();
+			Percent_Saved();
+			SumSaved();
+			AmtPYNeeded();
+			PostWorkLifespan();
+			AveragePY_Current(); 
+			AmtPYNeeded()
+			AmtPYNeeded_Inflated(); 
+			ReachedGoal_NonInflate(); 
+			ReachedGoal_Inflate(); 
+			drawBarGraph(); 
+		}
+
+		function YearsToRetirement () //How many years until the person retires
+		{
+			yearsUntilRetire = RetireAge - CurrentAge;
+			if (yearsUntilRetire<0)
+			{
+				yearsUntilRetire = 0; 
+			}
+		}
+		function SalaryPerYear () //What the salary will be per year 
+		{
+			var temp = Salary; 
+			var adjustedRaise = (Raise/100)+1; 
+			for (var i=0; i<yearsUntilRetire; i++)
+			{
+				temp = temp * adjustedRaise;
+				IncomeArray[i] = temp; 
+			}
+		}
+		function Percent_Saved () //What the amount saved is per year based on variable salary 
+		{
+			for (var i=0; i<IncomeArray.length; i++)
+			{
+				var temp2 = IncomeArray[i];
+				var AdjustedPercentSaved = PercentSaved/100;
+				SavedArray[i] = temp2*AdjustedPercentSaved;
+			}
+		}
+		function SumSaved () //Total amount saved in the time until retirement 
+		{
+			initsum = sum_Saved; 
+			for (var i=0; i<SavedArray.length; i++)
+			{               
+				sum_Saved += SavedArray[i];
+			}
+			truncatesum_Saved = Math.round(sum_Saved*100)/100; 
+			document.getElementById("show_sum_Saved").innerHTML=truncatesum_Saved; 
+		}
+
+		function AveragePY_Current () //How much they are saving per year on average 
+		{
+			CurrentYearly = (sum_Saved/yearsUntilRetire); 
+			truncateCurrentYearly = Math.round(CurrentYearly*100)/100; 
+			document.getElementById("showCurrentYearly").innerHTML=truncateCurrentYearly;
+		}
+		
+		function PostWorkLifespan () //How much they need for retirement 
+		{
+			totalGoal = PerYearRetirement * (DesiredLifespan - RetireAge);
+			truncateTotalGoal = Math.round(totalGoal*100)/100;
+			document.getElementById("show_totalGoal").innerHTML=truncateTotalGoal;
+			GoalAverage = totalGoal/yearsUntilRetire; 
+			truncateGoalAverage = Math.round(GoalAverage*100)/100; 
+			document.getElementById("showGoalAverage").innerHTML=truncateGoalAverage;
+		}
+		
+		function AmtPYNeeded () //How much more they need to save per year
+		{
+			Difference = totalGoal - sum_Saved;
+			PY_difference = Difference/yearsUntilRetire;
+			truncatePY_difference = Math.round(PY_difference*100)/100; 
+		}
+		
+		function AmtPYNeeded_Inflated () //How much more they need to save per year, inflation-adjusted 
+		{
+			InflateAdjust = totalGoal * (1.0323)^(DesiredLifespan - CurrentAge);
+			truncateInflateAdjust = Math.round(InflateAdjust*100)/100;
+			document.getElementById("show_InflateAdjust").innerHTML=truncateInflateAdjust; 
+			InflatedGoalAverage = InflateAdjust/yearsUntilRetire; 
+			truncateInflatedGoalAverage = Math.round(InflatedGoalAverage*100)/100; 
+			document.getElementById("showInflatedGoalAverage").innerHTML=truncateInflatedGoalAverage;
+			InflateDifference = InflateAdjust - sum_Saved;
+			PY_difference_Inflate = InflateDifference/yearsUntilRetire; 
+			truncatePY_difference_Inflate = Math.round(PY_difference_Inflate*100)/100; 
+		}
+
+		function ReachedGoal_NonInflate ()
+		{
+			if (sum_Saved >= totalGoal)
+				ReachedGoal = true; 
+			else if (sum_Saved < totalGoal)
+				ReachedGoal = false; 
+			if (ReachedGoal == true)
+			{
+				Goal_string = 'Savings goal (not adjusted for inflation): <span style="color:#009900;">You are on track!</span>'; 
+				document.getElementById("show_Goal_string").innerHTML=Goal_string; 
+				absPY_difference = (PY_difference)*(-1); 
+				absPY_difference = Math.round(absPY_difference*100)/100; 
+				difference_string1 = "<b>You can spend " + absPY_difference + " dollars less per year</b>, and still meet your retirement goal (not adjusted for inflation)."
+				document.getElementById("ShowSaveSpend1").innerHTML=difference_string1; 
+			}
+			else if (ReachedGoal == false)
+			{
+				Goal_string = 'Savings goal (not adjusted for inflation): <span style="color:#A30000;">You are not on track!</span>'; 
+				document.getElementById("show_Goal_string").innerHTML=Goal_string; 
+				difference_string1 = "<b>You must save " + truncatePY_difference + " dollars additional per year</b> to meet your retirement goal (not adjusted for inflation)."
+				document.getElementById("ShowSaveSpend1").innerHTML=difference_string1; 
+			}
+		}
+
+		function ReachedGoal_Inflate ()
+		{
+			if (sum_Saved >= InflateAdjust)
+				ReachedGoal2 = true; 
+			else if (sum_Saved < InflateAdjust)
+				ReachedGoal2 = false; 
+			if (ReachedGoal2 == true)
+			{
+				Goal_string2 = 'Savings goal (adjusted for inflation): <span style="color:#009900;">You are on track!</span>';
+				document.getElementById("show_Goal_string2").innerHTML=Goal_string2; 
+				absPY_difference_inflate = PY_difference_Inflate * (-1); 
+				absPY_difference_inflate = Math.round(absPY_difference_inflate*100)/100; 
+				difference_string2 = "<b>You can spend " + absPY_difference_inflate + " dollars less per year</b>, and still meet your retirement goal (adjusted for inflation)."
+				document.getElementById("ShowSaveSpend2").innerHTML=difference_string2; 
+			}
+			else if (ReachedGoal2 == false)
+			{
+				Goal_string2 = 'Savings goal (adjusted for inflation): <span style="color:#A30000;">You are not on track!</span>'; 
+				document.getElementById("show_Goal_string2").innerHTML=Goal_string2;
+				difference_string2 = "<b>You must save " + truncatePY_difference_Inflate + " dollars additional per year </b> to meet your retirement goal (adjusted for inflation)."
+				document.getElementById("ShowSaveSpend2").innerHTML=difference_string2; 
+			}
+
+		}
+
+		function drawBarGraph () //Draw bar graph 
+		{
+			 var canvas2 = document.getElementById("canvas");
+			canvas2.height = 450;
+			canvas2.width = 600;
+			var data = 
+			{
+				labels : ["Bar 1","Bar 2", "Bar 3"],
+				datasets : 
+				[
+				{
+					fillColor : "rgba(151,187,205,0.5)",
+					strokeColor : "rgba(151,187,205,0.5)",
+					data: [sum_Saved, totalGoal, InflateAdjust]
+				}
+				]
+			}
+			var myLine = new Chart(document.getElementById("canvas").getContext("2d")).Bar(data);
+		}
+		
+	</script>
+</head>
+
+<body>
+
+	 <div id="header-container">
+		<div id="header">
+			<h1 style="float:left;"><a href="index.html">Finance for Kids</a></h1>
+			<span id="header-links"><p><a href="interest_calculator.html">Interest Calculator</a> | <a href="retirement_app.html">Retirement Calculator</a></p></span>
+		</div>
+	</div>
+
+
+	<div id ="container">
+		<div id="calc_input">
+			<div style="text-align:center; font-size:18px;padding-bottom:10px;">Enter Values</div>
+			<div class="label">Current Age:</div>
+		 	&nbsp;&nbsp;<input type="text" id="iCurrentAge" style="width:65px" maxlength="3" /><br />
+
+			<div class="label">Retirement Age:</div>
+			&nbsp;&nbsp;<input type="text" id="iRetireAge" style="width:65px" maxlength="3" /><br />
+
+			<div class="label">Amount Saved So Far:</div>
+			$<input type="text" id="isum_Saved" style="width:65px" /><br />
+
+			<div class="label">Current Income:</div>
+			$<input type="text" id="iSalary" style="width:65px" />per year<br />
+
+		 	<div class="label">Expected Annual Raise:</div>
+			&nbsp;&nbsp;<input type="text" id="iRaise" style="width:65px" />% per year<br />
+
+			<div class="label">Savings Rate:</div>
+			&nbsp;&nbsp;<input type="text" id="iPercentSaved" style="width:65px" />% of annual income<br />
+
+			<div class="label">Expected Yearly Expenditures During Retirement:</div>
+			$<input type="text" id="iPerYearRetirement" style="width:65px; margin-top:30px;" /><br />
+			<div class="label">Expected Lifespan:</div>
+			&nbsp;&nbsp;<input type="text" id="iDesiredLifespan" style="width:65px;" maxlength="3" /><br />
+			<br />
+			<div id="calculateButton">
+				<button type="button" onclick="calculate()">Calculate</button>
+			</div>
+			<br />	
+		</div>
+		<div id = "goal_information">
+			<h3>
+			<span id="show_Goal_string"></span> </br>
+			<span id="show_Goal_string2"></span>
+			</h3>
+		</div>
+		<div id="information">
+			<h><b>
+				What does this graph mean?
+			</b></h> 
+			<p>
+				Bar 1: You will have saved a total of <strong>$<span id="show_sum_Saved">0</span>  </strong> by retirement.</br>
+				Bar 2: You will need <strong>$<span id="show_totalGoal">0</span> </strong> in total to retire.</br> 
+				Bar 3: Adjusting for inflation, you will need <strong>$<span = id="show_InflateAdjust">0</span> </strong> in total to retire.</br>
+			</p>
+		</div>
+		<div id="graph-container">
+			<div id="y-label-container">
+				<div id="y-label">
+					Dollars
+				</div>
+			</div>
+			<div id="graph">
+				<canvas id="canvas" height="450" width="600"></canvas>
+			</div>
+		</div>
+		<div id = "moneyinfo">
+		<p>
+			Currently, based on the percent you plan to save, your initial amount saved, your income, and your salary raise probability, 
+			<b> you plan on saving <span id="showCurrentYearly"></span> dollars per year. </b></br>
+		</p>
+		<p>
+			In order to meet your raw retirement goal in dollars, <b> you need to be saving <span id="showGoalAverage"></span> dollars per year. </b> 
+			<span id="ShowSaveSpend1"></span> 
+		</p>
+		<p>
+			Adjusting for inflation, <b> you need to be saving <span id="showInflatedGoalAverage"></span> dollars per year. </b> 
+			<span id ="ShowSaveSpend2"></span>
+		</p>
+		</div>
+		<br style="clear:both" />
+	</div>
+</body>
+</html>
+
+
+
+
+
+
